@@ -395,7 +395,8 @@ download_ui() {
     mkdir -p "$CONFIG_DIR/ui"
     
     # 下载MetaCubeX UI
-    local ui_url="https://github.com/MetaCubeX/metacubexd/releases/download/v1.187.1/compressed-dist.tgz"
+    local ui_latest_version=$(curl -s https://api.github.com/repos/MetaCubeX/metacubexd/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    local ui_url="https://github.com/MetaCubeX/metacubexd/releases/download/${ui_latest_version}/compressed-dist.tgz"
     
     if wget -O /tmp/ui.tgz "$ui_url"; then
         tar -xzf /tmp/ui.tgz -C "$CONFIG_DIR/ui"
