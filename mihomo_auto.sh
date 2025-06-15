@@ -397,7 +397,7 @@ download_ui() {
     # 下载MetaCubeX UI
     local ui_latest_version=$(curl -s https://api.github.com/repos/MetaCubeX/metacubexd/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
     local ui_url="https://github.com/MetaCubeX/metacubexd/releases/download/${ui_latest_version}/compressed-dist.tgz"
-    
+
     if wget -O /tmp/ui.tgz "$ui_url"; then
         tar -xzf /tmp/ui.tgz -C "$CONFIG_DIR/ui"
         rm -f /tmp/ui.tgz
@@ -447,9 +447,9 @@ create_config() {
         # 创建一个基本的默认配置
         cat > "$CONFIG_DIR/config.yaml" << 'EOF'
 # Mihomo 基本配置文件
-mixed-port: 7890
-port: 7891
-socks-port: 7892
+mixed-port: 7893
+port: 7890
+socks-port: 7891
 allow-lan: true
 bind-address: "*"
 mode: rule
@@ -614,7 +614,7 @@ setup_simple_rules() {
     iptables -t nat -A PREROUTING -d 10.0.0.0/8 -j RETURN
     iptables -t nat -A PREROUTING -d 172.16.0.0/12 -j RETURN
     iptables -t nat -A PREROUTING -d 192.168.0.0/16 -j RETURN
-    iptables -t nat -A PREROUTING -p tcp -j REDIRECT --to-ports 7892
+    iptables -t nat -A PREROUTING -p tcp -j REDIRECT --to-ports 7891
     
     # MASQUERADE规则
     local external_interface=$(ip route | grep default | awk '{print $5}' | head -n1)
@@ -633,7 +633,7 @@ cleanup_simple_rules() {
 
 # 检查规则
 check_simple_rules() {
-    if iptables -t nat -L PREROUTING 2>/dev/null | grep -q "REDIRECT.*7892"; then
+    if iptables -t nat -L PREROUTING 2>/dev/null | grep -q "REDIRECT.*7891"; then
         return 0
     else
         return 1
@@ -659,9 +659,9 @@ check_status() {
         local main_ip=$(get_main_ip)
         echo -e "${YELLOW}• 代理机IP: $main_ip${PLAIN}"
         echo -e "${YELLOW}• 控制面板: http://$main_ip:9090${PLAIN}"
-        echo -e "${YELLOW}• 混合代理: $main_ip:7890${PLAIN}"
-        echo -e "${YELLOW}• HTTP代理: $main_ip:7891${PLAIN}"
-        echo -e "${YELLOW}• SOCKS代理: $main_ip:7892${PLAIN}"
+        echo -e "${YELLOW}• 混合代理: $main_ip:7893${PLAIN}"
+        echo -e "${YELLOW}• HTTP代理: $main_ip:7890${PLAIN}"
+        echo -e "${YELLOW}• SOCKS代理: $main_ip:7891${PLAIN}"
         echo -e "${YELLOW}• DNS服务: $main_ip:53${PLAIN}"
         
         # 检查端口监听
@@ -720,7 +720,7 @@ check_status() {
     if check_simple_rules; then
         echo -e "${GREEN}✓ iptables透明代理规则: 已配置${PLAIN}"
         echo -e "\n${CYAN}规则详情:${PLAIN}"
-        iptables -t nat -L PREROUTING -n 2>/dev/null | grep "REDIRECT.*7892" || echo "规则格式可能不同"
+        iptables -t nat -L PREROUTING -n 2>/dev/null | grep "REDIRECT.*7891" || echo "规则格式可能不同"
     else
         echo -e "${YELLOW}⚠ iptables透明代理规则: 未检测到标准规则${PLAIN}"
         echo -e "${YELLOW}• 可能使用了其他方式配置或规则格式不同${PLAIN}"
@@ -807,9 +807,9 @@ show_usage_guide() {
     echo -e "${YELLOW}使用方法一: 手动代理设置${PLAIN}"
     echo -e "${CYAN}适用于: 单个设备或应用程序代理${PLAIN}"
     echo -e "${CYAN}配置方法:${PLAIN}"
-    echo -e "   • HTTP代理: $main_ip:7891"
-    echo -e "   • SOCKS5代理: $main_ip:7892"
-    echo -e "   • 混合代理: $main_ip:7890 (推荐)"
+    echo -e "   • HTTP代理: $main_ip:7890"
+    echo -e "   • SOCKS5代理: $main_ip:7891"
+    echo -e "   • 混合代理: $main_ip:7893 (推荐)"
     echo
     
     if $service_running; then
@@ -852,9 +852,9 @@ show_usage_guide() {
     echo
     
     echo -e "${YELLOW}代理端口说明:${PLAIN}"
-    echo -e "${CYAN}• 混合代理端口: $main_ip:7890 (HTTP + SOCKS5)${PLAIN}"
-    echo -e "${CYAN}• HTTP代理端口: $main_ip:7891${PLAIN}"
-    echo -e "${CYAN}• SOCKS5代理端口: $main_ip:7892${PLAIN}"
+    echo -e "${CYAN}• 混合代理端口: $main_ip:7893 (HTTP + SOCKS5)${PLAIN}"
+    echo -e "${CYAN}• HTTP代理端口: $main_ip:7890${PLAIN}"
+    echo -e "${CYAN}• SOCKS5代理端口: $main_ip:7891${PLAIN}"
     echo -e "${CYAN}• DNS服务端口: $main_ip:53${PLAIN}"
     echo
     
@@ -863,7 +863,7 @@ show_usage_guide() {
     if $service_running; then
         if check_simple_rules; then
             echo -e "${GREEN}• 透明代理规则: 已配置${PLAIN}"
-            echo -e "${CYAN}• 自动重定向TCP流量到端口7892${PLAIN}"
+            echo -e "${CYAN}• 自动重定向TCP流量到端口7891${PLAIN}"
             echo -e "${CYAN}• 排除本机和SSH流量，防止连接中断${PLAIN}"
         else
             echo -e "${YELLOW}• 透明代理规则: 未检测到标准格式${PLAIN}"
@@ -885,7 +885,7 @@ show_usage_guide() {
     echo -e "${CYAN}• 查看服务日志: journalctl -u mihomo -f${PLAIN}"
     echo -e "${CYAN}• 检查端口监听: ss -tlnp | grep mihomo${PLAIN}"
     echo -e "${CYAN}• 查看防火墙规则: iptables -t nat -L PREROUTING${PLAIN}"
-    echo -e "${CYAN}• 测试代理连接: curl --proxy http://$main_ip:7890 httpbin.org/ip${PLAIN}"
+    echo -e "${CYAN}• 测试代理连接: curl --proxy http://$main_ip:7893 httpbin.org/ip${PLAIN}"
     echo -e "${CYAN}• 如透明代理不工作: 重新运行 [1] 一键安装${PLAIN}"
     
     read -p "按任意键返回主菜单..." key
@@ -1183,9 +1183,9 @@ one_key_install() {
         echo -e "${GREEN}======================================================${PLAIN}"
         echo -e "${YELLOW}控制面板: ${GREEN}http://$main_ip:9090${PLAIN}"
         echo -e "${YELLOW}管理密码: ${GREEN}1124${PLAIN}"
-        echo -e "${YELLOW}混合代理: ${GREEN}$main_ip:7890${PLAIN}"
-        echo -e "${YELLOW}HTTP代理: ${GREEN}$main_ip:7891${PLAIN}"
-        echo -e "${YELLOW}SOCKS代理: ${GREEN}$main_ip:7892${PLAIN}"
+        echo -e "${YELLOW}混合代理: ${GREEN}$main_ip:7893${PLAIN}"
+        echo -e "${YELLOW}HTTP代理: ${GREEN}$main_ip:7890${PLAIN}"
+        echo -e "${YELLOW}SOCKS代理: ${GREEN}$main_ip:7891${PLAIN}"
         echo -e "${YELLOW}DNS服务: ${GREEN}$main_ip:53${PLAIN}"
         echo -e "${GREEN}======================================================${PLAIN}"
         echo -e "${YELLOW}透明代理配置:${PLAIN}"
