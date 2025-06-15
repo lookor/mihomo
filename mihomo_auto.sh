@@ -425,7 +425,7 @@ create_config() {
     
     # 如果本地没有配置文件，则从 GitHub 下载
     echo -e "${CYAN}本地未找到配置文件，正在从 GitHub 下载...${PLAIN}"
-    local config_url="https://raw.githubusercontent.com/wallentv/mihomo-proxy/refs/heads/master/mihomo/config.yaml"
+    local config_url="https://raw.githubusercontent.com/lookor/mihomo/refs/heads/main/config.yaml"
     
     if wget -O "$CONFIG_DIR/config.yaml" "$config_url"; then
         chmod 644 "$CONFIG_DIR/config.yaml"
